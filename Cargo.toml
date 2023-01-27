@@ -1,0 +1,27 @@
+[package]
+name = "stark-curve"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+crypto-bigint = "0.4"
+elliptic-curve = "0.12"
+ff = { version = "0.12", features = ["derive"] }
+generic-array = "0.14"
+hex-literal = "0.3"
+# primeorder = "0.12"
+primeorder = { git = "https://github.com/survived/elliptic-curves", branch = "primeorder/generic-a" }
+subtle = "2"
+zeroize = "1.5"
+
+[dev-dependencies]
+rand = "0.8"
+rand_dev = "0.1"
+
+starknet-curve = "0.1"
+starknet-ff = "0.2"
+
+hex = "0.4"
+
