@@ -1,3 +1,5 @@
+#![no_std]
+
 pub use primeorder::{
     self,
     elliptic_curve::{

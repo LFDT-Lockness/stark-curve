@@ -1,5 +1,5 @@
-use std::iter::{Product, Sum};
-use std::ops::{
+use core::iter::{Product, Sum};
+use core::ops::{
     Add, AddAssign, Deref, DerefMut, Mul, MulAssign, Neg, ShlAssign, ShrAssign, Sub, SubAssign,
 };
 
