@@ -1,9 +1,19 @@
-use std::ops::{Add, AddAssign, Deref, DerefMut, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::iter::{Product, Sum};
+use std::ops::{
+    Add, AddAssign, Deref, DerefMut, Mul, MulAssign, Neg, ShlAssign, ShrAssign, Sub, SubAssign,
+};
 
-use crypto_bigint::{Encoding, UInt, U256};
-use elliptic_curve::{Field, IsHigh, PrimeField, ScalarCore};
-use generic_array::{typenum, GenericArray};
+use primeorder::elliptic_curve::ops::Invert;
 use subtle::{ConditionallySelectable, ConstantTimeEq, ConstantTimeGreater, CtOption};
+
+use crate::bigint::{Encoding, Uint, U256};
+use crate::elliptic_curve::{
+    self,
+    scalar::{FromUintUnchecked, IsHigh, ScalarPrimitive},
+    Field, PrimeField,
+};
+use crate::generic_array::GenericArray;
+use crate::typenum;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct W<F>(F);
@@ -51,7 +61,7 @@ impl<F: PrimeField> W<F> {
         Self(
             bytes
                 .iter()
-                .fold(F::zero(), |s, b| s * F::from(256) + F::from(u64::from(*b))),
+                .fold(F::ZERO, |s, b| s * F::from(256) + F::from(u64::from(*b))),
         )
     }
 
@@ -60,8 +70,27 @@ impl<F: PrimeField> W<F> {
             bytes
                 .iter()
                 .rev()
-                .fold(F::zero(), |s, b| s * F::from(256) + F::from(u64::from(*b))),
+                .fold(F::ZERO, |s, b| s * F::from(256) + F::from(u64::from(*b))),
         )
+    }
+
+    pub fn from_uint_mod_order(uint: &U256) -> Self {
+        Self::from_be_bytes_mod_order(&uint.to_be_bytes())
+    }
+}
+
+impl<F: PrimeField> W<F>
+where
+    [u8; 32]: From<F::Repr>,
+{
+    pub fn to_uint(&self) -> U256 {
+        U256::from_be_bytes(self.to_be_bytes().into())
+    }
+}
+
+impl<F> AsRef<W<F>> for W<F> {
+    fn as_ref(&self) -> &W<F> {
+        self
     }
 }
 
@@ -71,13 +100,22 @@ impl<F: From<u64>> From<u64> for W<F> {
     }
 }
 
-impl<F: PrimeField, const LIMBS: usize> From<W<F>> for UInt<LIMBS>
+impl<F: PrimeField, const LIMBS: usize> From<W<F>> for Uint<LIMBS>
 where
-    UInt<LIMBS>: Encoding,
-    <UInt<LIMBS> as Encoding>::Repr: From<F::Repr>,
+    Uint<LIMBS>: Encoding,
+    <Uint<LIMBS> as Encoding>::Repr: From<F::Repr>,
 {
     fn from(s: W<F>) -> Self {
-        UInt::from_be_bytes(s.to_be_bytes().into())
+        Uint::from_be_bytes(s.to_be_bytes().into())
+    }
+}
+
+impl<F: PrimeField> FromUintUnchecked for W<F> {
+    type Uint = U256;
+
+    fn from_uint_unchecked(uint: Self::Uint) -> Self {
+        let bytes_be = uint.to_be_bytes();
+        Self::from_be_bytes_mod_order(&bytes_be)
     }
 }
 
@@ -90,6 +128,30 @@ impl<F: ConditionallySelectable> ConditionallySelectable for W<F> {
 impl<F: ConstantTimeEq> ConstantTimeEq for W<F> {
     fn ct_eq(&self, other: &Self) -> subtle::Choice {
         self.0.ct_eq(&other.0)
+    }
+}
+
+impl<F: Sum> Sum for W<F> {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        Self(iter.map(|f| f.0).sum())
+    }
+}
+
+impl<'f, F: Sum<&'f F>> Sum<&'f W<F>> for W<F> {
+    fn sum<I: Iterator<Item = &'f W<F>>>(iter: I) -> Self {
+        Self(iter.map(|f| &f.0).sum())
+    }
+}
+
+impl<F: Product> Product for W<F> {
+    fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
+        Self(iter.map(|f| f.0).product())
+    }
+}
+
+impl<'f, F: Product<&'f F>> Product<&'f W<F>> for W<F> {
+    fn product<I: Iterator<Item = &'f W<F>>>(iter: I) -> Self {
+        Self(iter.map(|f| &f.0).product())
     }
 }
 
@@ -185,17 +247,53 @@ impl<'r, F: SubAssign<&'r F>> SubAssign<&'r W<F>> for W<F> {
     }
 }
 
+impl<F: ShlAssign<usize>> ShlAssign<usize> for W<F> {
+    fn shl_assign(&mut self, rhs: usize) {
+        self.0 <<= rhs
+    }
+}
+
+impl<F> ShrAssign<usize> for W<F>
+where
+    [u8; 32]: From<F::Repr>,
+    F: PrimeField,
+{
+    fn shr_assign(&mut self, rhs: usize) {
+        let n = self.to_uint();
+        *self = Self::from_uint_mod_order(&(n >> rhs))
+    }
+}
+
+impl<F: Field> Invert for W<F> {
+    type Output = CtOption<Self>;
+
+    fn invert(&self) -> Self::Output {
+        self.0.invert().map(Self)
+    }
+}
+
+impl<F> elliptic_curve::ops::Reduce<U256> for W<F>
+where
+    F: PrimeField,
+    W<F>: PrimeField,
+{
+    type Bytes = <W<F> as PrimeField>::Repr;
+
+    fn reduce(n: U256) -> Self {
+        Self::from_be_bytes_mod_order(&n.to_be_bytes())
+    }
+
+    fn reduce_bytes(bytes: &Self::Bytes) -> Self {
+        Self::from_be_bytes_mod_order(bytes.as_ref())
+    }
+}
+
 impl<F: Field> Field for W<F> {
-    fn random(rng: impl crypto_bigint::rand_core::RngCore) -> Self {
+    const ZERO: Self = W(F::ZERO);
+    const ONE: Self = W(F::ONE);
+
+    fn random(rng: impl crate::rand_core::RngCore) -> Self {
         Self(F::random(rng))
-    }
-
-    fn zero() -> Self {
-        Self(F::zero())
-    }
-
-    fn one() -> Self {
-        Self(F::one())
     }
 
     fn square(&self) -> Self {
@@ -213,6 +311,11 @@ impl<F: Field> Field for W<F> {
     fn sqrt(&self) -> CtOption<Self> {
         self.0.sqrt().map(Self)
     }
+
+    fn sqrt_ratio(num: &Self, div: &Self) -> (subtle::Choice, Self) {
+        let (choice, res) = F::sqrt_ratio(num, div);
+        (choice, Self(res))
+    }
 }
 
 impl<F> PrimeField for W<F>
@@ -223,9 +326,15 @@ where
 {
     type Repr = GenericArray<u8, typenum::U32>;
 
+    const MODULUS: &'static str = F::MODULUS;
     const NUM_BITS: u32 = F::NUM_BITS;
     const CAPACITY: u32 = F::CAPACITY;
+    const TWO_INV: Self = Self(F::TWO_INV);
+    const MULTIPLICATIVE_GENERATOR: Self = Self(F::MULTIPLICATIVE_GENERATOR);
     const S: u32 = F::S;
+    const ROOT_OF_UNITY: Self = Self(F::ROOT_OF_UNITY);
+    const ROOT_OF_UNITY_INV: Self = Self(F::ROOT_OF_UNITY_INV);
+    const DELTA: Self = Self(F::DELTA);
 
     fn from_repr(repr: Self::Repr) -> CtOption<Self> {
         F::from_repr(repr.into()).map(Self)
@@ -238,22 +347,14 @@ where
     fn is_odd(&self) -> subtle::Choice {
         self.0.is_odd()
     }
-
-    fn multiplicative_generator() -> Self {
-        Self(F::multiplicative_generator())
-    }
-
-    fn root_of_unity() -> Self {
-        Self(F::root_of_unity())
-    }
 }
 
 impl<F: Default + Copy> zeroize::DefaultIsZeroes for W<F> {}
 
-impl<F: PrimeField, C: elliptic_curve::Curve> From<ScalarCore<C>> for W<F> {
-    fn from(s: ScalarCore<C>) -> Self {
-        let bytes_be = s.to_be_bytes();
-        Self::from_be_bytes_mod_order(&bytes_be)
+impl<F: PrimeField, C: elliptic_curve::Curve> From<ScalarPrimitive<C>> for W<F> {
+    fn from(s: ScalarPrimitive<C>) -> Self {
+        let bytes_be = s.as_uint().to_be_bytes();
+        Self::from_be_bytes_mod_order(bytes_be.as_ref())
     }
 }
 
@@ -273,7 +374,7 @@ where
     U256: From<W<F>>,
 {
     fn is_high(&self) -> subtle::Choice {
-        let n = Self::zero() - Self::one();
+        let n = Self::ZERO - Self::ONE;
         let n_2 = U256::from(n) >> 1;
 
         let s = U256::from(*self);

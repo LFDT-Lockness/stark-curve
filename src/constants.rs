@@ -1,26 +1,12 @@
 /// Curve constants defined in the (spec)[https://docs.starkware.co/starkex/crypto/stark-curve.html]
-use crate::core::{field_element::FieldElementCore, scalar::ScalarCore, W};
-use crate::{FieldElement, Scalar};
+use crate::core::{field_element::FieldElementCore, W};
+use crate::FieldElement;
 
 /// Internal bytes representation of defined constants.
 ///
 /// See the tests below which ensure that specified internal bytes repr
 /// indeed matches constant defined in the specs
 mod internal_bytes_repr {
-    pub const ZERO: [u64; 4] = [0; 4];
-    pub const ONE_S: [u64; 4] = [
-        5877859471073257295,
-        14366136140576156654,
-        8,
-        576460752303422961,
-    ];
-    pub const ONE_FE: [u64; 4] = [
-        18446744073709551585,
-        18446744073709551615,
-        18446744073709551615,
-        576460752303422960,
-    ];
-
     pub const EQUATION_A: [u64; 4] = [
         18446744073709551585,
         18446744073709551615,
@@ -46,16 +32,6 @@ mod internal_bytes_repr {
         405578048423154473,
     ];
 }
-
-pub(crate) const ZERO_S: Scalar = W::new(ScalarCore::from_internal_repr(internal_bytes_repr::ZERO));
-pub(crate) const ONE_S: Scalar = W::new(ScalarCore::from_internal_repr(internal_bytes_repr::ONE_S));
-
-pub(crate) const ZERO_FE: FieldElement = W::new(FieldElementCore::from_internal_repr(
-    internal_bytes_repr::ZERO,
-));
-pub(crate) const ONE_FE: FieldElement = W::new(FieldElementCore::from_internal_repr(
-    internal_bytes_repr::ONE_FE,
-));
 
 /// Coefficient $\alpha$ of curve equation
 ///
@@ -86,23 +62,16 @@ pub const GENERATOR: (FieldElement, FieldElement) = (
 
 #[cfg(test)]
 mod tests {
-    use elliptic_curve::Field;
     use hex_literal::hex;
 
-    use crate::{FieldElement, Scalar};
+    use crate::FieldElement;
 
     #[test]
     fn defined_cosntants_align_with_specs() {
         // Hex-encoded constants can be found here:
         // https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature.js#L38-L50
 
-        let zero_s = Scalar::zero();
-        let one_s = Scalar::one();
-
-        let zero_fe = FieldElement::zero();
-        let one_fe = FieldElement::one();
-
-        let a = FieldElement::one();
+        let a = FieldElement::ONE;
         let b = FieldElement::from_be_bytes(
             hex!("06f21413 efbe40de 150e596d 72f7a8c5 609ad26c 15c915c1 f4cdfcb9 9cee9e89").into(),
         )
@@ -117,17 +86,11 @@ mod tests {
         )
         .unwrap();
 
-        println!("zero_s: {:?}", zero_s.internal_repr());
-        println!("one_s: {:?}", one_s.internal_repr());
-        println!("zero_fe: {:?}", zero_fe.internal_repr());
-        println!("one_fe: {:?}", one_fe.internal_repr());
         println!("a: {:?}", a.internal_repr());
         println!("b: {:?}", b.internal_repr());
         println!("g_x: {:?}", g_x.internal_repr());
         println!("g_y: {:?}", g_y.internal_repr());
 
-        assert_eq!(super::ZERO_S, zero_s);
-        assert_eq!(super::ONE_S, one_s);
         assert_eq!(super::EQUATION_A, a);
         assert_eq!(super::EQUATION_B, b);
         assert_eq!(super::GENERATOR.0, g_x);

@@ -1,4 +1,4 @@
-use elliptic_curve::{sec1::ToEncodedPoint, Field};
+use primeorder::elliptic_curve::{sec1::ToEncodedPoint, Field};
 use rand_dev::DevRng;
 use stark_curve::Scalar;
 

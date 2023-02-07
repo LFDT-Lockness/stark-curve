@@ -4,7 +4,8 @@ pub use wrapper::W;
 
 pub mod field_element {
     use ff::PrimeField;
-    use generic_array::{typenum, GenericArray};
+
+    use crate::generic_array::{typenum, GenericArray};
 
     #[derive(PrimeField)]
     #[PrimeFieldModulus = "3618502788666131213697322783095070105623107215331596699973092056135872020481"]
@@ -50,7 +51,8 @@ pub mod field_element {
 
 pub mod scalar {
     use ff::PrimeField;
-    use generic_array::{typenum, GenericArray};
+
+    use crate::generic_array::{typenum, GenericArray};
 
     #[derive(PrimeField)]
     #[PrimeFieldModulus = "3618502788666131213697322783095070105526743751716087489154079457884512865583"]
@@ -59,11 +61,12 @@ pub mod scalar {
     pub struct ScalarCore([u64; 4]);
 
     impl ScalarCore {
+        #[allow(dead_code)]
         pub(crate) const fn from_internal_repr(repr: [u64; 4]) -> Self {
             Self(repr)
         }
 
-        #[cfg(test)]
+        #[allow(dead_code)]
         pub(crate) const fn internal_repr(&self) -> &[u64; 4] {
             &self.0
         }
@@ -94,12 +97,14 @@ pub mod scalar {
     }
 }
 
+use crate::ff::Field;
+
 impl W<field_element::FieldElementCore> {
-    pub const ZERO: Self = crate::constants::ZERO_FE;
-    pub const ONE: Self = crate::constants::ONE_FE;
+    pub const ZERO: Self = Self::new(field_element::FieldElementCore::ZERO);
+    pub const ONE: Self = Self::new(field_element::FieldElementCore::ONE);
 }
 
 impl W<scalar::ScalarCore> {
-    pub const ZERO: Self = crate::constants::ZERO_S;
-    pub const ONE: Self = crate::constants::ONE_S;
+    pub const ZERO: Self = Self::new(scalar::ScalarCore::ZERO);
+    pub const ONE: Self = Self::new(scalar::ScalarCore::ONE);
 }

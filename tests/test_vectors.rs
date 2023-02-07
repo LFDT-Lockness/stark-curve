@@ -1,5 +1,5 @@
-use elliptic_curve::sec1::ToEncodedPoint;
 use hex_literal::hex;
+use primeorder::elliptic_curve::sec1::ToEncodedPoint;
 use stark_curve::{AffinePoint, Scalar};
 
 // Test vectors are taken from: https://github.com/paulmillr/noble-curves/blob/fcd422d24617e610a41eaef82e5d8ebc1b190971/test/stark/basic.test.js#L8

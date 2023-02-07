@@ -1,5 +1,18 @@
-use crypto_bigint::U256;
-use elliptic_curve::{AffineArithmetic, Curve, PrimeCurve, ProjectiveArithmetic, ScalarArithmetic};
+pub use primeorder::{
+    self,
+    elliptic_curve::{
+        self,
+        bigint::{self, rand_core},
+        ff,
+        generic_array::{self, typenum},
+    },
+};
+
+use bigint::U256;
+use elliptic_curve::{
+    scalar::{FromUintUnchecked, ScalarPrimitive},
+    Curve, CurveArithmetic, PrimeCurve,
+};
 use primeorder::PrimeCurveParams;
 
 use self::core::{field_element::FieldElementCore, scalar::ScalarCore, W};
@@ -16,36 +29,35 @@ pub type ProjectivePoint = primeorder::ProjectivePoint<StarkCurve>;
 pub struct StarkCurve;
 
 impl Curve for StarkCurve {
-    type UInt = U256;
+    type FieldBytesSize = typenum::U32;
+    type Uint = U256;
 
-    const ORDER: Self::UInt =
+    const ORDER: Self::Uint =
         U256::from_be_hex("0800000000000010ffffffffffffffffb781126dcae7b2321e66a241adc64d2f");
 }
 
 impl PrimeCurve for StarkCurve {}
 
-impl ScalarArithmetic for StarkCurve {
+impl CurveArithmetic for StarkCurve {
     type Scalar = Scalar;
-}
-
-impl AffineArithmetic for StarkCurve {
     type AffinePoint = AffinePoint;
-}
-
-impl ProjectiveArithmetic for StarkCurve {
     type ProjectivePoint = ProjectivePoint;
 }
 
 impl PrimeCurveParams for StarkCurve {
     type FieldElement = FieldElement;
-
-    const ZERO: Self::FieldElement = FieldElement::ZERO;
-    const ONE: Self::FieldElement = FieldElement::ONE;
+    type PointArithmetic = primeorder::point_arithmetic::EquationAIsGeneric;
 
     const EQUATION_A: Self::FieldElement = constants::EQUATION_A;
     const EQUATION_B: Self::FieldElement = constants::EQUATION_B;
 
     const GENERATOR: (Self::FieldElement, Self::FieldElement) = constants::GENERATOR;
+}
 
-    const EQUATION_A_EQUALS_MINUS_3: bool = false;
+impl elliptic_curve::FieldBytesEncoding<StarkCurve> for U256 {}
+
+impl From<Scalar> for ScalarPrimitive<StarkCurve> {
+    fn from(s: Scalar) -> Self {
+        ScalarPrimitive::from_uint_unchecked(s.to_uint())
+    }
 }
