@@ -35,3 +35,12 @@ used and tested.
 [primeorder]: https://crates.io/crates/primeorder
 [ff]: https://crates.io/crates/ff
 [elliptic-curve]: https://crates.io/crates/elliptic-curve
+
+## License
+
+Licensed under either of
+
+ * Apache License, Version 2.0
+ * MIT license
+
+at your option.
