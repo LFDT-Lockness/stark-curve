@@ -19,7 +19,7 @@ fn generator_at_large_scalar() {
 
     for _ in 0..50 {
         let scalar = Scalar::random(&mut rng).to_be_bytes();
-        println!("scalar: {:?}", scalar);
+        println!("scalar: {scalar:?}");
 
         test_mult_generator_at_scalar(&scalar.into());
     }

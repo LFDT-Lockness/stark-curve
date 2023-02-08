@@ -87,14 +87,9 @@ mod tests {
         )
         .unwrap();
 
-        println!("a: {:?}", a.internal_repr());
-        println!("b: {:?}", b.internal_repr());
-        println!("g_x: {:?}", g_x.internal_repr());
-        println!("g_y: {:?}", g_y.internal_repr());
-
-        assert_eq!(super::EQUATION_A, a);
-        assert_eq!(super::EQUATION_B, b);
-        assert_eq!(super::GENERATOR.0, g_x);
-        assert_eq!(super::GENERATOR.1, g_y);
+        assert_eq!(super::EQUATION_A, a, "{:?}", a.internal_repr());
+        assert_eq!(super::EQUATION_B, b, "{:?}", b.internal_repr());
+        assert_eq!(super::GENERATOR.0, g_x, "{:?}", g_x.internal_repr());
+        assert_eq!(super::GENERATOR.1, g_y, "{:?}", g_y.internal_repr());
     }
 }

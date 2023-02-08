@@ -39,7 +39,7 @@ pub mod field_element {
 
     impl From<FieldElementCoreRepr> for [u8; 32] {
         fn from(s: FieldElementCoreRepr) -> Self {
-            s.0.into()
+            s.0
         }
     }
 
@@ -89,7 +89,7 @@ pub mod scalar {
 
     impl From<ScalarCoreRepr> for [u8; 32] {
         fn from(s: ScalarCoreRepr) -> Self {
-            s.0.into()
+            s.0
         }
     }
 
