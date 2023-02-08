@@ -1,7 +1,14 @@
+//! Core functionality
+//!
+//! Contains [field_element] and [scalar] derived by [ff] crate, and a wrapper struct [`W`] that makes field element
+//! and scalar compatible with [elliptic-curve] crate.
+
 mod wrapper;
 
 pub use wrapper::W;
 
+/// Field element, derived by [ff] crate
+#[allow(missing_docs)]
 pub mod field_element {
     use ff::PrimeField;
 
@@ -49,6 +56,8 @@ pub mod field_element {
     }
 }
 
+/// Scalar, derived by [ff] crate
+#[allow(missing_docs)]
 pub mod scalar {
     use ff::PrimeField;
 
@@ -100,11 +109,15 @@ pub mod scalar {
 use crate::ff::Field;
 
 impl W<field_element::FieldElementCore> {
+    /// Field element $x = 0$
     pub const ZERO: Self = Self::new(field_element::FieldElementCore::ZERO);
+    /// Field element $x = 1$
     pub const ONE: Self = Self::new(field_element::FieldElementCore::ONE);
 }
 
 impl W<scalar::ScalarCore> {
+    /// Scalar $x = 0$
     pub const ZERO: Self = Self::new(scalar::ScalarCore::ZERO);
+    /// Scalar $x = 1$
     pub const ONE: Self = Self::new(scalar::ScalarCore::ONE);
 }

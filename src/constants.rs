@@ -1,4 +1,5 @@
-/// Curve constants defined in the (spec)[https://docs.starkware.co/starkex/crypto/stark-curve.html]
+//! Stark curve constants
+
 use crate::core::{field_element::FieldElementCore, W};
 use crate::FieldElement;
 

@@ -15,10 +15,15 @@ use crate::elliptic_curve::{
 use crate::generic_array::GenericArray;
 use crate::typenum;
 
+/// Wraps scalar or field element
+///
+/// Field element and scalar, derived by [ff], initially are not compatible with [elliptic-curve] crate
+/// and cannot be used together. This struct wraps scalar or field element, and implements required traits.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct W<F>(F);
 
 impl<F> W<F> {
+    /// Wraps `n`
     pub const fn new(n: F) -> Self {
         Self(n)
     }
@@ -38,25 +43,36 @@ impl<F> DerefMut for W<F> {
 }
 
 impl<F: PrimeField> W<F> {
+    /// Converts integer to byte array in big-endian
     pub fn to_be_bytes(&self) -> F::Repr {
         self.0.to_repr()
     }
 
+    /// Converts integer to byte array in little-endian
     pub fn to_le_bytes(&self) -> F::Repr {
         let mut bytes = self.to_be_bytes();
         bytes.as_mut().reverse();
         bytes
     }
 
+    /// Constructs integer from its bytes representation in big-endian
+    ///
+    /// Returns `None` if it overflows maximum allowed value
     pub fn from_be_bytes(bytes: F::Repr) -> CtOption<Self> {
         F::from_repr(bytes).map(Self)
     }
 
+    /// Constructs integer from its bytes representation in little-endian
+    ///
+    /// Returns `None` if it overflows maximum allowed value
     pub fn from_le_bytes(mut bytes: F::Repr) -> CtOption<Self> {
         bytes.as_mut().reverse();
         Self::from_be_bytes(bytes)
     }
 
+    /// Constructs integer from bytes in big-endian
+    ///
+    /// Integer is reduced modulo max allowed value ($p$ if it's field element, $n$ if it's a scalar)
     pub fn from_be_bytes_mod_order(bytes: &[u8]) -> Self {
         Self(
             bytes
@@ -65,6 +81,9 @@ impl<F: PrimeField> W<F> {
         )
     }
 
+    /// Constructs integer from bytes in little-endian
+    ///
+    /// Integer is reduced modulo max allowed value ($p$ if it's field element, $n$ if it's a scalar)
     pub fn from_le_bytes_mod_order(bytes: &[u8]) -> Self {
         Self(
             bytes
@@ -74,6 +93,9 @@ impl<F: PrimeField> W<F> {
         )
     }
 
+    /// Constructs integer from [U256]
+    ///
+    /// Integer is reduced modulo max allowed value ($p$ if it's field element, $n$ if it's a scalar)
     pub fn from_uint_mod_order(uint: &U256) -> Self {
         Self::from_be_bytes_mod_order(&uint.to_be_bytes())
     }
@@ -83,6 +105,7 @@ impl<F: PrimeField> W<F>
 where
     [u8; 32]: From<F::Repr>,
 {
+    /// Converts integer to [U256]
     pub fn to_uint(&self) -> U256 {
         U256::from_be_bytes(self.to_be_bytes().into())
     }
