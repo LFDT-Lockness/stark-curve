@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 ff = { version = "0.13", features = ["derive"] }
 hex-literal = "0.3"
-primeorder = { git = "https://github.com/RustCrypto/elliptic-curves/", rev = "d4dbe19" }
+primeorder = "0.13"
 subtle = "2"
 zeroize = "1.5"
 

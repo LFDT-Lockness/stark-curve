@@ -70,3 +70,9 @@ impl From<Scalar> for ScalarPrimitive<StarkCurve> {
         ScalarPrimitive::from_uint_unchecked(s.to_uint())
     }
 }
+
+impl From<&Scalar> for ScalarPrimitive<StarkCurve> {
+    fn from(s: &Scalar) -> Self {
+        ScalarPrimitive::from_uint_unchecked(s.to_uint())
+    }
+}
