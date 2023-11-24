@@ -1,3 +1,7 @@
+![License](https://img.shields.io/crates/l/stark-curve.svg)
+[![Docs](https://docs.rs/stark-curve/badge.svg)](https://docs.rs/stark-curve)
+[![Crates io](https://img.shields.io/crates/v/stark-curve.svg)](https://crates.io/crates/stark-curve)
+
 # Stark Curve
 
 Pure Rust implementation of [Stark Curve][stark-specs]. Provides basic elliptic curve arithmetic backed by
