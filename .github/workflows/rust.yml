@@ -11,18 +11,51 @@ env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: Swatinem/rust-cache@v2
-    - name: Build
-      run: cargo build --release
+      with:
+        cache-on-failure: "true"
+    - name: Check all-features
+      run: cargo check
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: "true"
     - name: Run tests
       run: cargo test
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
     - name: Check formatting
       run: cargo fmt --all -- --check
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: "true"
     - name: Run clippy
       run: cargo clippy --all --lib -- --no-deps -D clippy::all -D clippy::unwrap_used -D clippy::expect_used
-    - name: Run clippy tests
+  clippy-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: "true"
+    - name: Run clippy
       run: cargo clippy --tests -- -D clippy::all
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check changelogs
+      run: ./.github/changelog.sh
