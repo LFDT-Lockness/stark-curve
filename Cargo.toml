@@ -1,10 +1,10 @@
 [package]
 name = "stark-curve"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Stark curve implementation"
-repository = "https://github.com/dfns/stark-curve"
+repository = "https://github.com/LFDT-Lockness/stark-curve"
 categories = ["cryptography", "no-std", "no-std::no-alloc"]
 keywords = ["elliptic-curves", "stark-curve"]
 
