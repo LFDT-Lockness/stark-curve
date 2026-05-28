@@ -2,6 +2,7 @@
 [![Docs](https://docs.rs/stark-curve/badge.svg)](https://docs.rs/stark-curve)
 [![Crates io](https://img.shields.io/crates/v/stark-curve.svg)](https://crates.io/crates/stark-curve)
 [![Discord](https://img.shields.io/discord/905194001349627914?logo=discord&logoColor=ffffff&label=Discord)][in Discord]
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/LFDT-Lockness/stark-curve/badge)](https://scorecard.dev/viewer/?uri=github.com/LFDT-Lockness/stark-curve)
 
 # Stark Curve
 
@@ -44,7 +45,7 @@ used and tested.
 ## Join us in Discord!
 Feel free to reach out to us [in Discord]!
 
-[in Discord]: https://discordapp.com/channels/905194001349627914/1285268686147424388
+[in Discord]: https://discord.com/invite/hyperledger
 
 ## License
 
