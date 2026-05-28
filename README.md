@@ -45,7 +45,7 @@ used and tested.
 ## Join us in Discord!
 Feel free to reach out to us [in Discord]!
 
-[in Discord]: https://discordapp.com/channels/905194001349627914/1285268686147424388
+[in Discord]: https://discord.com/invite/hyperledger
 
 ## License
 
